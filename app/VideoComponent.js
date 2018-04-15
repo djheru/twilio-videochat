@@ -66,6 +66,19 @@ export default class VideoComponent extends Component {
     this.attachTracks(tracks, container);
   }
 
+  detachTracks(tracks) {
+    tracks.forEach(track => {
+      track.detach().forEach(detachedElement => {
+        detachedElement.remove();
+      });
+    });
+  }
+
+  detachParticipantTracks = (participant) => {
+    const tracks = Array.from(participant.tracks.values());
+    this.detachTracks(tracks);
+  };
+
   roomJoined = (activeRoom) => {
     console.log(`Joined as '${this.state.identity}'`);
     const localMediaAvailable = true;
@@ -76,6 +89,45 @@ export default class VideoComponent extends Component {
     if (!previewContainer.querySelector('video')) {
       this.attachParticipantTracks(activeRoom.localParticipant, previewContainer);
     }
+
+    // Handle the various room events
+    activeRoom.participants.forEach(participant => {
+      console.log(`Currently in room: ${participant.identity}`);
+      const previewContainer = this.refs.remoteMedia;
+      this.attachParticipantTracks(participant, previewContainer);
+    });
+
+    activeRoom.on('participantConnected', participant => {
+      console.log(`New participant connected: ${participant.identity}`);
+    });
+
+    activeRoom.on('trackAdded', (track, participant) => {
+      console.log(`${participant.identity} added track ${track.kind}`);
+      const previewContainer = this.refs.remoteMedia;
+      this.attachTracks([track], previewContainer);
+    });
+
+    activeRoom.on('trackRemoved', (track, participant) => {
+      console.log(`${participant.identity} removed track ${track.kind}`);
+      this.detachTracks([track]);
+    });
+
+    activeRoom.on('participantDisconnected', participant => {
+      console.log(`${participant.identity} left the room`);
+      this.detachParticipantTracks(participant)
+    });
+
+    activeRoom.on('disconnected', () => {
+      const previewTracks = this.state.previewTracks || [];
+      previewTracks.forEach(track => {
+        track.stop();
+      });
+
+      this.detachParticipantTracks(activeRoom.localParticipant);
+      activeRoom.participants.forEach(this.detachParticipantTracks);
+      this.state.activeRoom = null;
+      this.setState({ hasJoinedRoom: false, localMediaAvailable: false, })
+    });
   };
 
   render() {
