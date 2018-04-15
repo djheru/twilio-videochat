@@ -50,6 +50,11 @@ export default class VideoComponent extends Component {
       .then(room => this.roomJoined(room), e => console.log(`Could not connect to video: ${e.message}`));
   };
 
+  leaveRoom = () => {
+    this.state.activeRoom.disconnect();
+    this.setState({ hasJoinedRoom: false, localMediaAvailable: false });
+  };
+
   attachTracks(tracks, container) {
     tracks.forEach(track => {
       container.appendChild(track.attach());
@@ -80,7 +85,7 @@ export default class VideoComponent extends Component {
 
     // display "join room" if not in a room, "leave room" if in a room
     const joinOrLeaveRoomButton = (this.state.hasJoinedRoom) ?
-      (<RaisedButton label="Leave Room" secondary={true} onClick={() => console.log('leave room')}/>) :
+      (<RaisedButton label="Leave Room" secondary={true} onClick={this.leaveRoom}/>) :
       (<RaisedButton label="Join Room" secondary={true} onClick={this.joinRoom}/>);
     return (
       <Card>
