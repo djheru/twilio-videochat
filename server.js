@@ -36,7 +36,7 @@ app.get('/token', (req, res) => {
   const grant = new VideoGrant();
   token.addGrant(grant);
 
-  response.send({
+  res.send({
     identity, token: token.toJwt()
   });
 });
