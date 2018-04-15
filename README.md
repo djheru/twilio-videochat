@@ -23,4 +23,4 @@ https://www.twilio.com/console/projects/create
 
 #### Add Twilio client
 
-- `yarn install twilio`
+- `npm i -S twilio twilio-video axios`
