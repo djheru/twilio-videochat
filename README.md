@@ -21,3 +21,6 @@ https://www.twilio.com/console/projects/create
 - Enter API Key SID in `TWILIO_API_SID` field
 - Enter API Secret in `TWILIO_API_SECRET`
 
+#### Add Twilio client
+
+- `yarn install twilio`
